@@ -205,3 +205,29 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated data
+data/processed/
+*.npy
+*.index
+
+# FAISS
+vectordb/*.index
+
+# HuggingFace cache 
+.cache/
+huggingface/
+
+# OS junk
+.DS_Store
+Thumbs.db

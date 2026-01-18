@@ -1,0 +1,32 @@
+paths:
+  input_csv: data/qa_dataset.csv
+  output_documents: data/processed/documents.txt
+  processed_dir: data/processed
+
+  input_documents: data/processed/documents.txt
+  output_chunks: data/processed/chunks.csv
+
+  chunks_csv: data/processed/chunks.csv
+  embeddings_file: data/processed/embeddings.npy
+
+  vector_index: vectordb/faiss.index
+
+processing:
+  question_column: question
+  answer_column: answer
+
+chunking:
+  chunk_size: 80
+  overlap: 30
+  domain: customer_support
+  encoding: utf-8  
+  
+embedding:
+  model_name: paraphrase-MiniLM-L3-v2
+  device: cpu
+  batch_size: 32
+  
+
+vectordb:
+  index_type: flat_l2
+  

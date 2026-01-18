@@ -1,0 +1,18 @@
+numpy
+pandas
+
+scikit-learn
+
+sentence-transformers
+torch
+
+langchain
+faiss-cpu
+
+pyyaml
+tqdm
+
+
+langchain langchain-core langchain-community
+langchain-classic
+langchain-huggingface
