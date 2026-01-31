@@ -383,7 +383,6 @@ We welcome contributions! Here's how:
 
 ### Areas for contribution:
 - Better embedding models
-- Web UI for the chatbot
 - Database persistence for chat history
 - Fine-tuned models for skincare domain
 - Unit tests and documentation
