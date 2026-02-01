@@ -323,24 +323,14 @@ Bot: Retinol should be introduced gradually and used 2–3 times per week initia
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
-We welcome contributions! Here's how:
+This project is open for learning-based contributions such as:
 
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/your-feature`
-3. **Make changes** and test thoroughly
-4. **Commit**: `git commit -m "Add your feature"`
-5. **Push**: `git push origin feature/your-feature`
-6. **Create a Pull Request**
-
-### Areas for contribution:
-- Better embedding models
-- Web UI for the chatbot
-- Database persistence for chat history
-- Fine-tuned models for skincare domain
-- Unit tests and documentation
-
+-Improving prompts
+-Trying different embedding models
+-Adding a simple UI (Streamlit/FastAPI)
+-Improving documentation
 ---
 
 ##  License
@@ -379,10 +369,10 @@ A: The core functionality is good, but consider adding error handling, logging, 
 
 ##  Next Steps
 
-1. **Customize**: Add your own skincare Q&A dataset
-2. **Improve**: Experiment with different embedding models
-3. **Enhance**: Build a web interface with Flask/Streamlit
-4. **Deploy**: Deploy using Docker or cloud services
+1.Replace the dataset with your own domain data
+2.Experiment with different chunk sizes
+3.Swap the LLM or embedding model
+4.Add persistent memory or a web interface
 
 
 ---
