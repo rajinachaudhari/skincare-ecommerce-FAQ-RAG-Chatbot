@@ -1,10 +1,10 @@
-# Skincare Ecommerce FAQ RAG Chatbot 🧴
+# Skincare Ecommerce FAQ RAG Chatbot 
 
-A beginner-friendly **Retrieval-Augmented Generation (RAG)** chatbot specifically designed to answer skincare and ecommerce product questions using local machine learning models. This project requires **no API keys** and runs entirely on your CPU.
-
+A beginner-friendly Retrieval-Augmented Generation (RAG) chatbot designed to answer skincare and ecommerce-related questions using local, open-source language models.
+This project does not require API keys and runs fully on your local machine.
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [What is This Project?](#what-is-this-project)
 - [Features](#features)
@@ -17,37 +17,43 @@ A beginner-friendly **Retrieval-Augmented Generation (RAG)** chatbot specificall
 - [How It Works](#how-it-works)
 - [Usage](#usage)
 - [Project Components Explained](#project-components-explained)
-- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
 
 ---
 
-## 🤖 What is This Project?
+##  What is This Project?
 
-This is a **RAG (Retrieval-Augmented Generation) Chatbot** built specifically for skincare ecommerce customer support. Instead of relying on large API-based models, this chatbot:
+This is a Retrieval-Augmented Generation (RAG) chatbot built for skincare ecommerce FAQ-style customer support.
+Instead of relying on cloud-based APIs, the chatbot works by:
+Retrieving relevant skincare Q&A content using semantic search (FAISS)
+Augmenting the retrieved content into a structured prompt
+Generating answers using a local instruction-tuned language model
 
-1. **Retrieves** relevant Q&A from your knowledge base using semantic search
-2. **Augments** those results into a prompt
-3. **Generates** accurate answers using a local language model
+Why RAG?
+Improves answer accuracy by grounding responses in real data
+Prevents hallucination by restricting answers to retrieved context
+Makes the system explainable and modular
 
 **Key Benefits:**
-- ✅ No API costs or external service dependencies
-- ✅ Privacy-first: Everything runs locally on your machine
-- ✅ Fast retrieval using FAISS vector database
-- ✅ Beginner-friendly: Well-documented and modular
-- ✅ Customizable: Easy to adapt for your own Q&A data
+-  No API costs or external service dependencies
+-  Privacy-first: Everything runs locally on your machine
+-  Fast retrieval using FAISS vector database
+-  Beginner-friendly: Well-documented and modular
+-  Customizable: Easy to adapt for your own Q&A data
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🔍 **Semantic Search**: Uses embeddings to find relevant answers
-- 💬 **Conversation Memory**: Maintains chat history within sessions
-- 🚀 **Local & CPU-Friendly**: No GPU required, no cloud dependencies
-- 📊 **FAISS Vector Database**: Ultra-fast similarity search
-- ⚙️ **Configuration-Driven**: Easy to customize via `config.yaml`
-- 📚 **LangChain Integration**: Modern LLM framework for building chains
+- Semantic Search using vector embeddings
+- Conversation Memory (session-based, in-memory)
+- Local Language Model (FLAN-T5)
+- FAISS Vector Store for fast similarity search
+- Config-driven pipeline using config.yaml
+- LangChain-based RAG architecture
+
+⚠️ Note: This project is intended for learning and demonstration purposes.
 
 ---
 
@@ -57,18 +63,16 @@ Before getting started, ensure your system meets these requirements:
 
 ### Minimum Requirements:
 - **RAM**: 4 GB (8 GB recommended)
-- **Storage**: 5-10 GB free space
+- **Storage**: `5 GB free space
 - **Processor**: Any modern CPU (Works for low end PCs)
 - **OS**: Windows, macOS, or Linux
 - **Python**: Version 3.10 or higher
 
 ### Optional (Not Required):
-- GPU for faster inference (GPU not required but helpful)
-- Conda package manager (recommended for better dependency management)
-
+- GPU (can speed up inference, but not required)
 ---
 
-## 🚀 Installation & Setup
+##  Installation & Setup
 
 ### Step 1: Clone the Repository
 
@@ -121,14 +125,11 @@ pip install -r requirements.txt
 **What gets installed:**
 - `numpy` & `pandas`: Data processing
 - `sentence-transformers`: Embeddings and semantic search
-- `torch`: Deep learning framework (downloaded automatically)
 - `faiss-cpu`: Vector database for fast similarity search
 - `langchain` & `langchain-huggingface`: LLM orchestration
 - `transformers`: Pre-trained language models
-- `pyyaml`: Configuration file handling
-- `tqdm`: Progress bars
 
-**Installation Time:** 5-15 minutes (depending on internet speed)
+
 
 ### Step 4: Download Pre-trained Models
 
@@ -144,28 +145,38 @@ The project uses `config/config.yaml` for all settings. You can customize:
 
 ```yaml
 paths:
-  input_csv: data/qa_dataset.csv          # Your Q&A data
-  output_documents: data/processed/documents.txt
-  processed_dir: data/processed
-  vector_index: vectordb/faiss.index      # FAISS database
+  input_csv: data/qa_dataset.csv              # Input CSV containing Q&A data
+  output_documents: data/processed/documents.txt  # Combined text documents generated from CSV
+  processed_dir: data/processed               # Directory for all processed outputs
+
+  input_documents: data/processed/documents.txt   # Input file for chunking step
+  output_chunks: data/processed/chunks.csv        # Output CSV containing text chunks
+
+  chunks_csv: data/processed/chunks.csv       # Chunked text used for embedding
+  embeddings_file: data/processed/embeddings.npy # Saved embeddings (optional backup)
+
+  vector_index: vectordb/faiss.index           # FAISS vector index file
 
 processing:
-  question_column: question               # Column name in CSV
-  answer_column: answer                   # Column name in CSV
+  question_column: question                   # Question column name in CSV
+  answer_column: answer                       # Answer column name in CSV
 
 chunking:
-  chunk_size: 80                          # How many words per chunk
-  overlap: 30                             # Overlap between chunks
+  chunk_size: 80                              # Number of words per chunk
+  overlap: 30                                 # Overlap between consecutive chunks
+  domain: customer_support                   # Domain tag for the dataset
+  encoding: utf-8                             # Text encoding for file processing
 
 embedding:
-  model_name: paraphrase-MiniLM-L3-v2    # Embedding model
-  device: cpu                             # Use 'cuda' for GPU
-  batch_size: 32                          # How many texts to process at once
-```
+  model_name: paraphrase-MiniLM-L3-v2         # Sentence Transformer embedding model
+  device: cpu                                 # Use 'cuda' if GPU is available
+  batch_size: 32                              # Number of chunks processed per batch
 
+vectordb:
+  index_type: flat_l2                         # FAISS index type (Flat L2 distance)
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 skincare-ecommerce-FAQ-RAG-Chatbot/
@@ -201,7 +212,7 @@ skincare-ecommerce-FAQ-RAG-Chatbot/
 
 ---
 
-## 🔄 How It Works
+##  How It Works
 
 Here's the flow of data through the chatbot:
 
@@ -217,14 +228,14 @@ CSV Dataset → Documents → Chunks → Embeddings → FAISS Index
 
 ### 2. **Query & Response Phase** (During chatbot runtime)
 ```
-User Question → Embedding → Search FAISS → Retrieve Top-3 → Generate Answer
+User Question → Search FAISS → Retrieve Top-3 → Prompt Augmentation → FLAN-T5 Answer Generation
 ```
 
 - **User Input**: You ask a question about skincare
-- **Embedding**: Question is converted to a vector
 - **Semantic Search**: FAISS finds 3 most similar chunks (by cosine similarity)
 - **Context + LLM**: Results are passed to `google/flan-t5-base` LLM
-- **Answer**: LLM generates a natural language response using the context
+- **Prompt Augmentation**: Retrieved chunks are combined with the question in a prompt.
+- **Answer Generation**: FLAN-T5 generates the final answer using the provided context.
 
 ### 3. **Conversation Memory** (Sessions)
 - Each chat session is stored separately
@@ -233,7 +244,7 @@ User Question → Embedding → Search FAISS → Retrieve Top-3 → Generate Ans
 
 ---
 
-## 💬 Usage
+##  Usage
 
 ### Running the Chatbot
 
@@ -244,29 +255,13 @@ python main.py
 ### Example Interaction
 
 ```
-User: How do I use retinol for sensitive skin?
+User: Can I use retinol daily?
 
-Chatbot: Based on our knowledge base, retinol is a powerful ingredient 
-but can be harsh on sensitive skin. We recommend: 
-1. Start with low concentrations (0.1-0.25%)
-2. Use 2-3 times per week initially
-3. Always apply moisturizer after
-4. Use SPF 30+ during the day
+Bot: Retinol should be introduced gradually and used 2–3 times per week initially.
 ```
 
-### Session Management
 
-The chatbot maintains conversation history per session:
-
-```python
-# Different sessions maintain separate memory
-session_1 = get_session_history("user_123")
-session_2 = get_session_history("user_456")
-```
-
----
-
-## 🏗️ Project Components Explained
+##  Project Components Explained
 
 ### **1. Embedding Module** (`embedding/`)
 
@@ -284,9 +279,8 @@ session_2 = get_session_history("user_456")
 **Purpose**: Store and efficiently search embeddings
 
 **Technology**: FAISS (Facebook AI Similarity Search)
-- Creates an index for O(1) similarity search
+- Creates an index for O-1 similarity search
 - Uses Inner Product (equivalent to cosine similarity for normalized vectors)
-- ~50,000+ documents searchable in milliseconds
 
 **File**: `faiss.index` (binary file, pre-built for you)
 
@@ -316,48 +310,7 @@ session_2 = get_session_history("user_456")
 
 ---
 
-## 🛠️ Troubleshooting
-
-### "ImportError: No module named 'sentence_transformers'"
-**Solution**: Install requirements again
-```bash
-pip install -r requirements.txt
-```
-
-### "Model download stuck or slow"
-**Solution**: Models are cached after first download. Check internet connection.
-- First run: 5-15 minutes (downloads ~1 GB)
-- Subsequent runs: Instant
-
-### "FAISS index not found"
-**Solution**: The index is pre-built. If missing, regenerate it:
-```bash
-python vectordb/vector_store.py
-```
-
-### "Out of memory error"
-**Solution**: Reduce batch size in `config.yaml`:
-```yaml
-embedding:
-  batch_size: 8  # Reduce from 32 to 8
-```
-
-### "Chatbot gives irrelevant answers"
-**Solution**: Check your Q&A dataset. Quality in = quality out. Also try:
-- Increasing `top_k` in retriever (search more chunks)
-- Adjusting `chunk_size` for better granularity
-
-### "Windows: 'python' is not recognized"
-**Solution**: Use full path or add Python to PATH
-```bash
-C:\Python\python.exe main.py
-# OR if Python is in PATH:
-python main.py
-```
-
----
-
-## 📖 Getting Started Checklist
+##  Getting Started Checklist
 
 - [ ] Clone the repository
 - [ ] Create a virtual environment
@@ -383,19 +336,20 @@ We welcome contributions! Here's how:
 
 ### Areas for contribution:
 - Better embedding models
+- Web UI for the chatbot
 - Database persistence for chat history
 - Fine-tuned models for skincare domain
 - Unit tests and documentation
 
 ---
 
-## 📄 License
+##  License
 
 This project is licensed under the LICENSE file included in the repository. See [LICENSE](LICENSE) for details.
 
 ---
 
-## ❓ FAQ
+##  FAQ
 
 **Q: Can I use a GPU to speed this up?**
 A: Yes! Change `device: cpu` to `device: cuda` in `config.yaml` if you have NVIDIA GPU.
@@ -410,11 +364,11 @@ A: Modify the `model` parameter in `main.py`. Any Hugging Face model works!
 A: See optional deployment guides: Docker, Streamlit UI, FastAPI backend.
 
 **Q: Is this production-ready?**
-A: The core functionality is solid, but consider adding error handling, logging, and testing before production.
+A: The core functionality is good, but consider adding error handling, logging, and testing before production.
 
 ---
 
-## 📚 Resources
+##  Resources
 
 - [LangChain Documentation](https://docs.langchain.com/)
 - [FAISS Library](https://github.com/facebookresearch/faiss)
@@ -423,25 +377,15 @@ A: The core functionality is solid, but consider adding error handling, logging,
 
 ---
 
-## 🎯 Next Steps
+##  Next Steps
 
 1. **Customize**: Add your own skincare Q&A dataset
 2. **Improve**: Experiment with different embedding models
 3. **Enhance**: Build a web interface with Flask/Streamlit
 4. **Deploy**: Deploy using Docker or cloud services
 
----
-
-## 📞 Support
-
-If you encounter issues:
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Review error messages carefully
-3. Check that all dependencies are installed
-4. Open an issue on GitHub with details of your problem
 
 ---
 
-**Happy Chatting! 🤖✨**
-
-Built with ❤️ for the skincare ecommerce community.
+Built as a learning-focused RAG project using open-source tools.
+Happy experimenting! 🤖✨
