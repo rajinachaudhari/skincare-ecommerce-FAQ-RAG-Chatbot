@@ -30,11 +30,6 @@ Retrieving relevant skincare Q&A content using semantic search (FAISS)
 Augmenting the retrieved content into a structured prompt
 Generating answers using a local instruction-tuned language model
 
-Why RAG?
-Improves answer accuracy by grounding responses in real data
-Prevents hallucination by restricting answers to retrieved context
-Makes the system explainable and modular
-
 **Key Benefits:**
 -  No API costs or external service dependencies
 -  Privacy-first: Everything runs locally on your machine
@@ -208,44 +203,46 @@ skincare-ecommerce-FAQ-RAG-Chatbot/
     ├── faiss.index                # FAISS vector database (binary)
     └── vector_store.py            # Create and manage FAISS index
 
-##  How It Works
-
-Here's the flow of data through the chatbot:
-
 ---
 
-##  Data Preparation Phase (One-time setup)
-
-```
-CSV Dataset → Documents → Chunks → Embeddings → FAISS Index
-```
-
-- **CSV to Documents**: Your Q&A pairs are converted to text
-- **Chunking**: Long texts are split into smaller pieces (configurable)
-- **Embeddings**: Each chunk is converted to a vector using `paraphrase-MiniLM-L3-v2`
-- **FAISS Index**: Vectors are stored in a searchable index
-
----
-
-##  Query & Response Phase (During chatbot runtime)
-
-```
-User Question → Search FAISS → Retrieve Top-3 → Prompt Augmentation → FLAN-T5 Answer Generation
-```
-
-- **User Input**: You ask a question about skincare
-- **Semantic Search**: FAISS finds 3 most similar chunks (by cosine similarity)
-- **Context + LLM**: Results are passed to `google/flan-t5-base` LLM
-- **Prompt Augmentation**: Retrieved chunks are combined with the question in a prompt.
-- **Answer Generation**: FLAN-T5 generates the final answer using the provided context.
-
----
-
-##  Conversation Memory (Sessions)
-
-- Each chat session is stored separately
-- Memory is in-memory (lost when app stops)
-- Easy to extend with database persistence
+> ##  How It Works
+> 
+> Here's the flow of data through the chatbot:
+> 
+> ---
+> 
+> ##  Data Preparation Phase (One-time setup)
+> 
+> ```
+> CSV Dataset → Documents → Chunks → Embeddings → FAISS Index
+> ```
+> 
+> - **CSV to Documents**: Your Q&A pairs are converted to text
+> - **Chunking**: Long texts are split into smaller pieces (configurable)
+> - **Embeddings**: Each chunk is converted to a vector using `paraphrase-MiniLM-L3-v2`
+> - **FAISS Index**: Vectors are stored in a searchable index
+> 
+> ---
+> 
+> ##  Query & Response Phase (During chatbot runtime)
+> 
+> ```
+> User Question → Search FAISS → Retrieve Top-3 → Prompt Augmentation → FLAN-T5 Answer Generation
+> ```
+> 
+> - **User Input**: You ask a question about skincare
+> - **Semantic Search**: FAISS finds 3 most similar chunks (by cosine similarity)
+> - **Context + LLM**: Results are passed to `google/flan-t5-base` LLM
+> - **Prompt Augmentation**: Retrieved chunks are combined with the question in a prompt.
+> - **Answer Generation**: FLAN-T5 generates the final answer using the provided context.
+> 
+> ---
+> 
+> ##  Conversation Memory (Sessions)
+> 
+> - Each chat session is stored separately
+> - Memory is in-memory (lost when app stops)
+> - Easy to extend with database persistence
 
 ---
 
