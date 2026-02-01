@@ -210,8 +210,6 @@ skincare-ecommerce-FAQ-RAG-Chatbot/
     └── vector_store.py            # Create and manage FAISS index
 ```
 
----
-
 ##  How It Works
 
 Here's the flow of data through the chatbot:
