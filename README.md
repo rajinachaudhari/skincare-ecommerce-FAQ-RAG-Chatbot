@@ -178,7 +178,6 @@ vectordb:
 
 ##  Project Structure
 
-```
 skincare-ecommerce-FAQ-RAG-Chatbot/
 │
 ├── main.py                          # Main chatbot application
@@ -208,13 +207,15 @@ skincare-ecommerce-FAQ-RAG-Chatbot/
 └── vectordb/
     ├── faiss.index                # FAISS vector database (binary)
     └── vector_store.py            # Create and manage FAISS index
-```
 
 ##  How It Works
 
 Here's the flow of data through the chatbot:
 
-### 1. **Data Preparation Phase** (One-time setup)
+---
+
+##  Data Preparation Phase (One-time setup)
+
 ```
 CSV Dataset → Documents → Chunks → Embeddings → FAISS Index
 ```
@@ -224,7 +225,10 @@ CSV Dataset → Documents → Chunks → Embeddings → FAISS Index
 - **Embeddings**: Each chunk is converted to a vector using `paraphrase-MiniLM-L3-v2`
 - **FAISS Index**: Vectors are stored in a searchable index
 
-### 2. **Query & Response Phase** (During chatbot runtime)
+---
+
+##  Query & Response Phase (During chatbot runtime)
+
 ```
 User Question → Search FAISS → Retrieve Top-3 → Prompt Augmentation → FLAN-T5 Answer Generation
 ```
@@ -235,7 +239,10 @@ User Question → Search FAISS → Retrieve Top-3 → Prompt Augmentation → FL
 - **Prompt Augmentation**: Retrieved chunks are combined with the question in a prompt.
 - **Answer Generation**: FLAN-T5 generates the final answer using the provided context.
 
-### 3. **Conversation Memory** (Sessions)
+---
+
+##  Conversation Memory (Sessions)
+
 - Each chat session is stored separately
 - Memory is in-memory (lost when app stops)
 - Easy to extend with database persistence
@@ -325,10 +332,11 @@ Bot: Retinol should be introduced gradually and used 2–3 times per week initia
 
 This project is open for learning-based contributions such as:
 
--Improving prompts
--Trying different embedding models
--Adding a simple UI (Streamlit/FastAPI)
--Improving documentation
+- Improving prompts
+- Trying different embedding models
+- Adding a simple UI (Streamlit/FastAPI)
+- Improving documentation
+
 ---
 
 ##  License
@@ -367,11 +375,10 @@ A: The core functionality is good, but consider adding error handling, logging, 
 
 ##  Next Steps
 
-1.Replace the dataset with your own domain data
-2.Experiment with different chunk sizes
-3.Swap the LLM or embedding model
-4.Add persistent memory or a web interface
-
+1. Replace the dataset with your own domain data
+2. Experiment with different chunk sizes
+3. Swap the LLM or embedding model
+4. Add persistent memory or a web interface
 
 ---
 
