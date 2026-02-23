@@ -1,20 +1,26 @@
 from transformers import pipeline
 
-
 from langchain_huggingface import HuggingFacePipeline
 from langchain_community.chat_message_histories import ChatMessageHistory
-
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-###FAISS RETRIEVER IMPORT###
-from retrieval.retriever import semantic_search_faiss
+# ✅ Import new class-based retriever
+from retrieval.retriever import FaissSemanticRetriever
 
 
-###LLM setup###
+# ==============================
+# Initialize FAISS retriever instance
+# ==============================
+faiss_retriever_instance = FaissSemanticRetriever()
+
+
+# ==============================
+# LLM Setup
+# ==============================
 llm_pipeline = pipeline(
     task="text2text-generation",
     model="google/flan-t5-base",
@@ -24,7 +30,9 @@ llm_pipeline = pipeline(
 llm = HuggingFacePipeline(pipeline=llm_pipeline)
 
 
-### In-memory session store for chat history###
+# ==============================
+# Chat Memory
+# ==============================
 store = {}
 
 def get_session_history(session_id: str):
@@ -33,13 +41,17 @@ def get_session_history(session_id: str):
     return store[session_id]
 
 
-
-###Core Retriever method using FAISS###
+# ==============================
+# LangChain Wrapper Retriever
+# ==============================
 class FaissRetriever(BaseRetriever):
-    top_k: int = 3  # declare as a Pydantic field
+    top_k: int = 3
 
     def _get_relevant_documents(self, query: str):
-        results_df = semantic_search_faiss(query, top_k=self.top_k)
+        results_df = faiss_retriever_instance.semantic_search(
+            query,
+            top_k=self.top_k
+        )
 
         docs = []
         for _, row in results_df.iterrows():
@@ -57,9 +69,13 @@ class FaissRetriever(BaseRetriever):
     async def _aget_relevant_documents(self, query: str):
         return self._get_relevant_documents(query)
 
+
 retriever = FaissRetriever(top_k=3)
 
-###Prompt Template (RAG PROMPT)###
+
+# ==============================
+# Prompt Template
+# ==============================
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
@@ -74,7 +90,10 @@ prompt = ChatPromptTemplate.from_messages([
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-###RAG CHAIN(core logic)###
+
+# ==============================
+# RAG Chain
+# ==============================
 rag_chain = (
     {
         "context": retriever | format_docs,
@@ -85,7 +104,9 @@ rag_chain = (
 )
 
 
-###ADD CONVERSATION MEMORY###
+# ==============================
+# Add Conversation Memory
+# ==============================
 chat_chain = RunnableWithMessageHistory(
     rag_chain,
     get_session_history,
@@ -94,18 +115,21 @@ chat_chain = RunnableWithMessageHistory(
 )
 
 
-###TERMINAL CHAT LOOP###
+# ==============================
+# Terminal Chat Loop
+# ==============================
 if __name__ == "__main__":
-    print("\n WElcome to Skincare FAQ RAG Chatbot")
+    print("\nWelcome to Skincare FAQ RAG Chatbot")
     print("Type 'exit' to quit\n")
 
     while True:
         query = input("You: ").strip()
+
         if query.lower() in {"exit", "quit"}:
-            print("Thank You for using the chatbot. Goodbye!")
+            print("Thank you for using the chatbot. Goodbye!")
             break
 
-        print("Running chain...")  # <-- loading statements
+        print("Running chain...")
 
         answer = chat_chain.invoke(
             {"question": query},

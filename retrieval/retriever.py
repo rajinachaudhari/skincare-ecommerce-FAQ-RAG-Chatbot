@@ -1,53 +1,54 @@
+
 # import faiss
 # import yaml
-# import numpy as np
 # import pandas as pd
 # from sentence_transformers import SentenceTransformer
 
-# # ---------------- Load config ----------------
+# ###loading config.yaml file###
 # with open("config/config.yaml", "r", encoding="utf-8") as f:
 #     config = yaml.safe_load(f)
 
-# # Paths from config
-# chunks_csv = config["paths"]["chunks_csv"]
 # faiss_index_file = config["paths"]["vector_index"]
 
-# # Model config
-# model_name = config["embedding"]["model_name"]
-# device = config["embedding"]["device"]
 
-# # ---------------- Load model and data ----------------
-# model = SentenceTransformer(model_name, device=device)
-# chunks_df = pd.read_csv(chunks_csv)
+# ###Loading chunked DataFrame directly###
+# chunks_df = pd.read_csv(config["paths"]["chunks_csv"])
+
+# ###selecting models directly###
+# model = SentenceTransformer(config["embedding"]["model_name"], device=config["embedding"]["device"])
 
 # # Load FAISS index
 # index = faiss.read_index(faiss_index_file)
 
-# # ---------------- Simple Retriever Function ----------------
-# def semantic_search_faiss(query: str, top_k: int = 3):
+# ###Retriever Function###
+# def semantic_search_faiss(query: str, top_k: int = 3) -> pd.DataFrame:
 #     """
-#     Returns top-k relevant chunks from FAISS index with similarity scores
+#     Cosine similarity retriever (scores ∈ [-1, 1])
 #     """
 
-#     # 1️⃣ Encode the query
-#     query_embedding = model.encode([query], convert_to_numpy=True)
+#    ###encoding query with normalization for cosine similarity###
+#     query_embedding = model.encode(
+#         [query],
+#         convert_to_numpy=True,
+#         normalize_embeddings=True
+#     )
 
-#     # 2️⃣ Normalize embeddings if FAISS index was built with inner product
-#     faiss.normalize_L2(query_embedding)
+#     ###FAISS cosine search###
+#     scores, indices = index.search(query_embedding, top_k)
 
-#     # 3️⃣ Search FAISS
-#     distances, indices = index.search(query_embedding, top_k)
+#     rows = []
+#     for score, idx in zip(scores[0], indices[0]):
+#         rows.append({
+#             "domain": chunks_df.iloc[idx]["domain"],
+#             "text": chunks_df.iloc[idx]["text"],
+#             "score": float(score)
+#         })
 
-#     # 4️⃣ Collect results
-#     results = []
-#     for score, idx in zip(distances[0], indices[0]):
-#         text = chunks_df.iloc[idx]["text"]
-#         domain = chunks_df.iloc[idx]["domain"] if "domain" in chunks_df.columns else "default"
-#         results.append({"domain": domain, "text": text, "score": float(score)})
-
-#     return results
-
-
+#     return (
+#         pd.DataFrame(rows)
+#         .sort_values("score", ascending=False)
+#         .reset_index(drop=True)
+#     )
 
 
 
@@ -56,48 +57,59 @@ import yaml
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 
-###loading config.yaml file###
-with open("config/config.yaml", "r", encoding="utf-8") as f:
-    config = yaml.safe_load(f)
 
-faiss_index_file = config["paths"]["vector_index"]
-
-
-###Loading chunked DataFrame directly###
-chunks_df = pd.read_csv(config["paths"]["chunks_csv"])
-
-###selecting models directly###
-model = SentenceTransformer(config["embedding"]["model_name"], device=config["embedding"]["device"])
-
-# Load FAISS index
-index = faiss.read_index(faiss_index_file)
-
-###Retriever Function###
-def semantic_search_faiss(query: str, top_k: int = 3) -> pd.DataFrame:
+class FaissSemanticRetriever:
     """
-    Cosine similarity retriever (scores ∈ [-1, 1])
+    Runtime FAISS retriever for semantic search.
+    Loads model + index once.
     """
 
-   ###encoding query with normalization for cosine similarity###
-    query_embedding = model.encode(
-        [query],
-        convert_to_numpy=True,
-        normalize_embeddings=True
-    )
+    def __init__(self, config_path: str = "config/config.yaml"):
+        self.config = self._load_config(config_path)
 
-    ###FAISS cosine search###
-    scores, indices = index.search(query_embedding, top_k)
+        # Load chunks dataframe (metadata)
+        self.chunks_df = pd.read_csv(self.config["paths"]["chunks_csv"])
 
-    rows = []
-    for score, idx in zip(scores[0], indices[0]):
-        rows.append({
-            "domain": chunks_df.iloc[idx]["domain"],
-            "text": chunks_df.iloc[idx]["text"],
-            "score": float(score)
-        })
+        # Load embedding model (for query encoding only)
+        self.model = SentenceTransformer(
+            self.config["embedding"]["model_name"],
+            device=self.config["embedding"]["device"]
+        )
 
-    return (
-        pd.DataFrame(rows)
-        .sort_values("score", ascending=False)
-        .reset_index(drop=True)
-    )
+        # Load FAISS index
+        self.index = faiss.read_index(self.config["paths"]["vector_index"])
+
+    @staticmethod
+    def _load_config(path: str):
+        with open(path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f)
+
+    def semantic_search(self, query: str, top_k: int = 3) -> pd.DataFrame:
+        """
+        Perform cosine similarity search using FAISS.
+        Returns top_k most relevant chunks.
+        """
+
+        # Encode query (must be normalized)
+        query_embedding = self.model.encode(
+            [query],
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        ).astype("float32")
+
+        # Search FAISS index
+        scores, indices = self.index.search(query_embedding, top_k)
+
+        results = []
+        for score, idx in zip(scores[0], indices[0]):
+            results.append({
+                "domain": self.chunks_df.iloc[idx]["domain"],
+                "text": self.chunks_df.iloc[idx]["text"],
+                "score": float(score)
+            })
+
+        return (
+            pd.DataFrame(results)
+            .sort_values("score", ascending=False)
+            .reset_index(drop=True)
+        )
